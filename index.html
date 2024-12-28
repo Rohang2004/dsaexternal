@@ -487,17 +487,35 @@ int prec(char symb)
 #include&lt;ctype.h&gt;
 
 
-int stack[20], top = -1;
+// Stack variables
+int stack[100]; // Increased size to handle larger expressions
+int top = -1;
 
-
-void postfix_evaluation();
+// Function prototypes
+void postfix_evaluation(char *postfix);
 void tower_of_hanoi(int n, char source, char temp, char dest);
-void push(int item) { stack[++top] = item; }
-int pop() { return stack[top--]; }
+void push(int item);
+int pop();
+
+void push(int item) {
+    if (top >= 99) {
+        printf("Stack Overflow.\n");
+        exit(1);
+    }
+    stack[++top] = item;
+}
+
+int pop() {
+    if (top < 0) {
+        printf("Stack Underflow.\n");
+        exit(1);
+    }
+    return stack[top--];
+}
 
 int main() {
     int choice, n;
-    char postfix[90];
+    char postfix[90]; // Declare the variable properly
 
     do {
         printf("\n1. Evaluate Postfix Expression\n2. Tower of Hanoi\n3. Exit\nChoice: ");
@@ -530,28 +548,40 @@ int main() {
 // Postfix Evaluation Function
 void postfix_evaluation(char *postfix) {
     for (int i = 0; postfix[i]; i++) {
-        if (isdigit(postfix[i]))
-            push(postfix[i] - '0');
-        else {
-            int op2 = pop(), op1 = pop();
+        if (isdigit(postfix[i])) {
+            push(postfix[i] - '0'); // Convert character to integer
+        } else {
+            int op2 = pop();
+            int op1 = pop();
             switch (postfix[i]) {
                 case '+': push(op1 + op2); break;
                 case '-': push(op1 - op2); break;
                 case '*': push(op1 * op2); break;
-                case '/': push(op1 / op2); break;
-                case '^': push(pow(op1, op2)); break;
+                case '/': 
+                    if (op2 == 0) {
+                        printf("Error: Division by zero.\n");
+                        return;
+                    }
+                    push(op1 / op2); 
+                    break;
+                case '^': push((int)pow(op1, op2)); break; // Cast pow() result to int
+                default:
+                    printf("Error: Invalid operator '%c'.\n", postfix[i]);
+                    return;
             }
         }
     }
     printf("Result: %d\n", pop());
 }
 
+// Tower of Hanoi Function
 void tower_of_hanoi(int n, char source, char temp, char dest) {
     if (n == 0) return;
     tower_of_hanoi(n - 1, source, dest, temp);
     printf("Move disc %d from %c to %c\n", n, source, dest);
     tower_of_hanoi(n - 1, temp, source, dest);
 }
+
 
 
             </pre>
